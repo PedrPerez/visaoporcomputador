@@ -1,13 +1,6 @@
-
-#include <iostream>
-#include <string>
-#include <chrono>
-#include <opencv2\opencv.hpp>
-#include <opencv2\core.hpp>
-#include <opencv2\highgui.hpp>
-#include <opencv2\videoio.hpp>
-
-
+#include "libs.h"
+#include "Video.h"
+#include "Frame.h"
 
 void vc_timer(void) {
 	static bool running = false;
@@ -32,8 +25,9 @@ void vc_timer(void) {
 
 
 int main(void) {
-	// Vídeo
-	char videofile[20] = "video.avi";
+
+	Video v("video.avi");
+
 	cv::VideoCapture capture;
 	struct
 	{
@@ -46,29 +40,18 @@ int main(void) {
 	std::string str;
 	int key = 0;
 
-	/* Leitura de vídeo de um ficheiro */
-	/* NOTA IMPORTANTE:
-	O ficheiro video.avi deverá estar localizado no mesmo directório que o ficheiro de código fonte.
-	*/
-	capture.open(videofile);
-
-	/* Em alternativa, abrir captura de vídeo pela Webcam #0 */
-	//capture.open(0, cv::CAP_DSHOW); // Pode-se utilizar apenas capture.open(0);
-
-	/* Verifica se foi possível abrir o ficheiro de vídeo */
-	if (!capture.isOpened())
-	{
-		std::cerr << "Erro ao abrir o ficheiro de vídeo!\n";
-		return 1;
+	if (v.init() == false) {
+		cout << "Nao foi possivel abrir o video!";
+		return 0;
 	}
 
 	/* Número total de frames no vídeo */
-	video.ntotalframes = (int)capture.get(cv::CAP_PROP_FRAME_COUNT);
+	video.ntotalframes = v.getTotalFrames();
 	/* Frame rate do vídeo */
-	video.fps = (int)capture.get(cv::CAP_PROP_FPS);
+	video.fps = v.getFrameRate();
 	/* Resolução do vídeo */
-	video.width = (int)capture.get(cv::CAP_PROP_FRAME_WIDTH);
-	video.height = (int)capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+	video.width = v.getWidth();
+	video.height = v.getHeight();
 
 	/* Cria uma janela para exibir o vídeo */
 	cv::namedWindow("VC - VIDEO", cv::WINDOW_AUTOSIZE);
@@ -76,30 +59,27 @@ int main(void) {
 	/* Inicia o timer */
 	vc_timer();
 
-	cv::Mat frame;
 	while (key != 'q') {
-		/* Leitura de uma frame do vídeo */
-		capture.read(frame);
+		Frame f;
 
-		/* Verifica se conseguiu ler a frame */
-		if (frame.empty()) break;
+		if (v.readFrame(f) == false) break;
 
 		/* Número da frame a processar */
-		video.nframe = (int)capture.get(cv::CAP_PROP_POS_FRAMES);
+		video.nframe = f.getnFrame();
 
 		/* Exemplo de inserção texto na frame */
 		str = std::string("RESOLUCAO: ").append(std::to_string(video.width)).append("x").append(std::to_string(video.height));
-		cv::putText(frame, str, cv::Point(20, 25), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
-		cv::putText(frame, str, cv::Point(20, 25), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
+		cv::putText(f.getFrame(), str, cv::Point(20, 25), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
+		cv::putText(f.getFrame(), str, cv::Point(20, 25), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
 		str = std::string("TOTAL DE FRAMES: ").append(std::to_string(video.ntotalframes));
-		cv::putText(frame, str, cv::Point(20, 50), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
-		cv::putText(frame, str, cv::Point(20, 50), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
+		cv::putText(f.getFrame(), str, cv::Point(20, 50), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
+		cv::putText(f.getFrame(), str, cv::Point(20, 50), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
 		str = std::string("FRAME RATE: ").append(std::to_string(video.fps));
-		cv::putText(frame, str, cv::Point(20, 75), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
-		cv::putText(frame, str, cv::Point(20, 75), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
+		cv::putText(f.getFrame(), str, cv::Point(20, 75), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
+		cv::putText(f.getFrame(), str, cv::Point(20, 75), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
 		str = std::string("N. DA FRAME: ").append(std::to_string(video.nframe));
-		cv::putText(frame, str, cv::Point(20, 100), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
-		cv::putText(frame, str, cv::Point(20, 100), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
+		cv::putText(f.getFrame(), str, cv::Point(20, 100), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0), 2);
+		cv::putText(f.getFrame(), str, cv::Point(20, 100), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 1);
 
 
 		// Faça o seu código aqui...
@@ -118,7 +98,7 @@ int main(void) {
 		// +++++++++++++++++++++++++
 
 		/* Exibe a frame */
-		cv::imshow("VC - VIDEO", frame);
+		cv::imshow("VC - VIDEO", f.getFrame());
 
 		/* Sai da aplicação, se o utilizador premir a tecla 'q' */
 		key = cv::waitKey(1);
