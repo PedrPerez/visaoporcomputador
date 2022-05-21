@@ -24,9 +24,18 @@ void vc_timer(void) {
 }
 
 
-int main(void) {
+int main(int argc, char* argv[]) {
+	
+	if (argc < 2) {
+		cout << "Erro: Nao especificou o video" << endl;
+		return 0;
+	}
 
-	Video v("video.avi");
+	string videoPath = string(argv[1]);
+	
+	
+
+	Video v(videoPath);
 
 	cv::VideoCapture capture;
 	struct
@@ -44,6 +53,16 @@ int main(void) {
 		cout << "Nao foi possivel abrir o video!";
 		return 0;
 	}
+	
+	if (argc == 4 && strcmp(argv[2], "export") == 0) {
+		if (v.saveVideoFrames(string(argv[3])) == false) {
+			cout << "Error Saving videos to Frames!";
+			exit(0);
+		}
+
+		exit(1);
+	}
+
 
 	/* Número total de frames no vídeo */
 	video.ntotalframes = v.getTotalFrames();

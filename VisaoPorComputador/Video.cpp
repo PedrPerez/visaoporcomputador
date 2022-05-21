@@ -31,3 +31,17 @@ bool Video::readFrame(Frame& f) {
 
 	return true;
 }
+
+
+bool Video::saveVideoFrames(string path) {
+	Frame f;
+	
+	while (this->readFrame(f) == true) {
+		if (f.saveFrame(path) == false)
+			return false;
+
+		cout << f.getnFrame() << "/" << this->getTotalFrames() << endl;
+	}
+
+	return true;
+}

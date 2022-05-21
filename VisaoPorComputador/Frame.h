@@ -10,7 +10,7 @@ private:
 public:
 	Frame(Mat& frame, int nFrame);
 
-	inline Frame(){}
+	Frame(){}
 
 	inline int getnFrame() {
 		return this->nFrame;
@@ -19,5 +19,7 @@ public:
 	inline Mat getFrame() {
 		return this->frame;
 	}
+
+	bool saveFrame(string file);
 };
 

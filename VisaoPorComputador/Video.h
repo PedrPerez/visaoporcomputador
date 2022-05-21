@@ -32,5 +32,7 @@ public:
 
 	bool readFrame(Frame& f);
 
+	bool saveVideoFrames(string path);
+
 };
 

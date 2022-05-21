@@ -3,3 +3,8 @@
 ################################################################################
 
 /.vs
+/VisaoPorComputador/.vs/VisaoPorComputador/v17
+/VisaoPorComputador/x64/Debug
+/VisaoPorComputador/frames
+/VisaoPorComputador/x64/exportVideoToPng
+*.png
