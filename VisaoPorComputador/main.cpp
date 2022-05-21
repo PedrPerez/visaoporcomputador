@@ -63,6 +63,18 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
+	if (argc == 4 && strcmp(argv[2], "image") == 0) {
+		Frame f(string(argv[3]), 1);
+
+		f.findContourns(50);
+
+		imshow("VC - VIDEO", f.getFrame());
+
+		waitKey(0);
+
+		exit(1);
+	}
+
 
 	/* Número total de frames no vídeo */
 	video.ntotalframes = v.getTotalFrames();
@@ -117,6 +129,7 @@ int main(int argc, char* argv[]) {
 		// +++++++++++++++++++++++++
 
 		/* Exibe a frame */
+		f.findContourns(50);
 		cv::imshow("VC - VIDEO", f.getFrame());
 
 		/* Sai da aplicação, se o utilizador premir a tecla 'q' */
