@@ -6,6 +6,7 @@ class Frame
 private:
 	Mat frame;
 	int nFrame;
+	vector<vector<Point> > contours;
 
 public:
 	Frame(Mat& frame, int nFrame);
@@ -29,5 +30,9 @@ public:
 	void findContourns(int thresh);
 
 	bool saveFrame(string file);
+
+private:
+	void mergeRectangles(vector<Rect>& boundRect);
+
 };
 
