@@ -24,14 +24,13 @@ void Frame::findContourns(int thresh) {
     Canny(this->frame, canny_output, thresh, thresh * 2);
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-    findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
-    Mat drawing = Mat::zeros(canny_output.size(), CV_8UC3);
+    findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+    Mat drawing = this->frame;//Mat::zeros(canny_output.size(), CV_8UC3);
     for (size_t i = 0; i < contours.size(); i++)
     {
-        Scalar color = Scalar(255, 255, 255);
+        Scalar color = Scalar(255, 51, 51);
         drawContours(drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
     }
 
-    this->frame = drawing.clone();
 
 }

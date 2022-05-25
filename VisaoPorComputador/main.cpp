@@ -64,13 +64,21 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (argc == 4 && strcmp(argv[2], "image") == 0) {
-		Frame f(string(argv[3]), 1);
+		
+		double threshold = 40;
 
-		f.findContourns(50);
+		while(1){
+			Frame f(string(argv[3]), 1);
 
-		imshow("VC - VIDEO", f.getFrame());
+			f.findContourns(threshold);
 
-		waitKey(0);
+			imshow("Video Threshold = " + to_string(threshold), f.getFrame());
+
+			waitKey(0);
+			
+			cout << "Threshold: ";
+			cin >> threshold;
+		}
 
 		exit(1);
 	}
@@ -97,6 +105,7 @@ int main(int argc, char* argv[]) {
 
 		/* Número da frame a processar */
 		video.nframe = f.getnFrame();
+		f.findContourns(50);
 
 		/* Exemplo de inserção texto na frame */
 		str = std::string("RESOLUCAO: ").append(std::to_string(video.width)).append("x").append(std::to_string(video.height));
@@ -129,7 +138,7 @@ int main(int argc, char* argv[]) {
 		// +++++++++++++++++++++++++
 
 		/* Exibe a frame */
-		f.findContourns(50);
+		
 		cv::imshow("VC - VIDEO", f.getFrame());
 
 		/* Sai da aplicação, se o utilizador premir a tecla 'q' */
