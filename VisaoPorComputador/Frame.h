@@ -33,6 +33,8 @@ public:
 
 private:
 	void mergeRectangles(vector<Rect>& boundRect);
+	bool intersectRectangle(Rect a, Rect b, float tolerance);
+	void filterRectangles(vector<Rect>& boundRect, float min_w, float min_h, float max_w, float max_h);
 
 };
 
