@@ -63,6 +63,15 @@ void Frame::filterRectangles(vector<Rect>& boundRect, float min_w, float min_h, 
 
 }   
 
+void Frame::text_legend(vector<string> textLine, Rect rect,float h_offset_percentage) {
+    
+    for(size_t i = 0; i < textLine.size(); i++){
+        putText(this->getFrame(), textLine.at(i),
+            cv::Point(rect.x, rect.y + rect.height + (h_offset_percentage * this->getFrame().size().height) + (h_offset_percentage*0.75 * this->getFrame().size().height)*i ),
+            cv::FONT_HERSHEY_SIMPLEX,
+            0.5, cv::Scalar(0, 0, 0), 2);
+    }
+}
 void Frame::mergeRectangles(vector<Rect>& boundRect) {
     for (size_t i = 0; i < boundRect.size(); i++) {
         for (size_t j = 0; j < boundRect.size(); j++) {
@@ -134,8 +143,17 @@ void Frame::findContourns(int thresh) {
 
     for (size_t i = 0; i < boundRect.size(); i++)
     {
+        stringstream ss;
+        vector<string> lines;
 
+        ss << "[" << boundRect[i].x << "][" << boundRect[i].y + boundRect[i].height + 5 << "]\n\tTeste!";
         rectangle(drawing, boundRect[i], color, 2, LINE_8, 0);
+        
+        lines.push_back(ss.str());
+        lines.push_back("teste1");
+        lines.push_back("teste2");
+
+        text_legend(lines, boundRect[i], 0.05);
 
     }
 }
