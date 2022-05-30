@@ -1,6 +1,7 @@
 #include "libs.h"
 #include "Video.h"
 #include "Frame.h"
+#include "ImageDb.h"
 
 void vc_timer(void) {
 	static bool running = false;
@@ -25,7 +26,8 @@ void vc_timer(void) {
 
 
 int main(int argc, char* argv[]) {
-	
+	vector<ImageDb> db;
+
 	if (argc < 2) {
 		cout << "Erro: Nao especificou o video" << endl;
 		return 0;
@@ -53,7 +55,13 @@ int main(int argc, char* argv[]) {
 		cout << "Nao foi possivel abrir o video!";
 		return 0;
 	}
-	
+		
+	// Parsing ficheiro
+	if (ImageDb::parseMetaDataFile("db\\meta.csv", db) == false) {
+		cout << "Error parsing metadata file!";
+		exit(0);
+	}
+
 	if (argc == 4 && strcmp(argv[2], "export") == 0) {
 		if (v.saveVideoFrames(string(argv[3])) == false) {
 			cout << "Error Saving videos to Frames!";
@@ -69,8 +77,10 @@ int main(int argc, char* argv[]) {
 
 		while(1){
 			Frame f(string(argv[3]), 1);
+			ImageDb r;
 
 			f.findContourns(threshold);
+			f.findMatch(db, r);
 
 			imshow("Video Threshold = " + to_string(threshold), f.getFrame());
 

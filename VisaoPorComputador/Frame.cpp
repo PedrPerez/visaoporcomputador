@@ -1,5 +1,6 @@
 #include "Frame.h"
 
+
 Frame::Frame(Mat& frame, int nFrame) {
 	this->frame = frame.clone();
 	this->nFrame = nFrame;
@@ -101,12 +102,13 @@ void Frame::mergeRectangles(vector<Rect>& boundRect) {
 
 void Frame::findContourns(int thresh) {
     Mat canny_output;
+    vector<vector<Point> > contours;
 
     Canny(this->frame, canny_output, thresh, thresh * 2);
     vector<Vec4i> hierarchy;
     findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
     Mat drawing = this->frame;//Mat::zeros(canny_output.size(), CV_8UC3);
-    vector<Rect> boundRect;
+    
     Scalar color = Scalar(255, 51, 51);
 
     for (size_t i = 0; i < contours.size(); i++)
@@ -156,4 +158,38 @@ void Frame::findContourns(int thresh) {
         text_legend(lines, boundRect[i], 0.05);
 
     }
+}
+
+bool Frame::findMatch(vector<ImageDb>& db, ImageDb& ret) {
+
+    for (size_t i = 0; i < boundRect.size(); i++) {
+        cout << i << " Square : " << endl;
+        for (size_t j = 0; j < db.size(); j++) {
+           
+            Mat result;
+            Mat templateImg = imread(db[j].getFilePath());
+            Mat originImg = this->frame(boundRect[i]);
+
+            
+            matchTemplate(originImg, templateImg, result, TM_CCORR_NORMED);
+            normalize(result, result, 0, 1, NORM_MINMAX, -1, Mat());
+
+            double minVal; double maxVal; Point minLoc; Point maxLoc;
+            Point matchLoc;
+
+            minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
+
+            cout << db[j].getFilePath() << " : " << endl;
+            cout << "\tminVal: " << minVal << endl;
+            cout << "\tmaxVal: " << maxVal << endl;
+            cout << "\tminLoc: " << minLoc << endl;
+            cout << "\tmaxLoc: " << maxLoc << endl;
+            
+
+
+        }
+        cout << "--------------" << endl;
+    }
+
+    return true;
 }
