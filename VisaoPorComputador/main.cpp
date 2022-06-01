@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 	// Outros
 	std::string str;
 	int key = 0;
-
+	
 	if (v.init() == false) {
 		cout << "Nao foi possivel abrir o video!";
 		return 0;
@@ -77,10 +77,10 @@ int main(int argc, char* argv[]) {
 
 		while(1){
 			Frame f(string(argv[3]), 1);
-			ImageDb r;
+			Mat r = f.getFrame();
 
 			f.findContourns(threshold);
-			f.findMatch(db, r);
+			f.identifyObjects(db);
 
 			imshow("Video Threshold = " + to_string(threshold), f.getFrame());
 
@@ -116,6 +116,8 @@ int main(int argc, char* argv[]) {
 		/* Número da frame a processar */
 		video.nframe = f.getnFrame();
 		f.findContourns(50);
+		f.identifyObjects(db);
+
 
 		/* Exemplo de inserção texto na frame */
 		str = std::string("RESOLUCAO: ").append(std::to_string(video.width)).append("x").append(std::to_string(video.height));

@@ -33,13 +33,14 @@ public:
 
 	bool saveFrame(string file);
 
-	bool findMatch(vector<ImageDb>& db, ImageDb& ret);
+	void identifyObjects(vector<ImageDb>& db);
+	void filter_orange(Mat& m);
 
 private:
 	void mergeRectangles(vector<Rect>& boundRect);
 	bool intersectRectangle(Rect a, Rect b, float tolerance);
 	void filterRectangles(vector<Rect>& boundRect, float min_w, float min_h, float max_w, float max_h);
 	void text_legend(vector<string> textLine, Rect rect, float h_offset_percentage);
-
+	
 };
 

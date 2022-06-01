@@ -145,51 +145,122 @@ void Frame::findContourns(int thresh) {
 
     for (size_t i = 0; i < boundRect.size(); i++)
     {
-        stringstream ss;
-        vector<string> lines;
-
-        ss << "[" << boundRect[i].x << "][" << boundRect[i].y + boundRect[i].height + 5 << "]\n\tTeste!";
         rectangle(drawing, boundRect[i], color, 2, LINE_8, 0);
         
-        lines.push_back(ss.str());
-        lines.push_back("teste1");
-        lines.push_back("teste2");
-
-        text_legend(lines, boundRect[i], 0.05);
 
     }
 }
 
-bool Frame::findMatch(vector<ImageDb>& db, ImageDb& ret) {
+void Frame::identifyObjects(vector<ImageDb>& db) {
+    int histSize = 256;
+    float range[] = { 0, 256 }; //the upper boundary is exclusive
+    const float* histRange[] = { range };
+    bool retf = false;
+
+    
 
     for (size_t i = 0; i < boundRect.size(); i++) {
-        cout << i << " Square : " << endl;
+        float corr_p = 0;
+        ImageDb * result = NULL;
+        double b_corr_f = 0;
+        double g_corr_f = 0;
+        double r_corr_f = 0;
+
         for (size_t j = 0; j < db.size(); j++) {
            
-            Mat result;
             Mat templateImg = imread(db[j].getFilePath());
+            vector<Mat> templateImg_bgr;
+            split(templateImg, templateImg_bgr);
+            Mat templateImg_hist[3];
+
+            calcHist(&templateImg_bgr[0], 1, 0, Mat(), templateImg_hist[0], 1, &histSize, histRange, true, false);
+            normalize(templateImg_hist[0], templateImg_hist[0], 0, 1, NORM_MINMAX, -1, Mat());
+            templateImg_hist[0].convertTo(templateImg_hist[0], CV_32F);
+
+            calcHist(&templateImg_bgr[1], 1, 0, Mat(), templateImg_hist[1], 1, &histSize, histRange, true, false);
+            normalize(templateImg_hist[1], templateImg_hist[1], 0, 1, NORM_MINMAX, -1, Mat());
+            templateImg_hist[1].convertTo(templateImg_hist[1], CV_32F);
+
+            calcHist(&templateImg_bgr[2], 1, 0, Mat(), templateImg_hist[2], 1, &histSize, histRange, true, false);
+            normalize(templateImg_hist[2], templateImg_hist[2], 0, 1, NORM_MINMAX, -1, Mat());
+            templateImg_hist[2].convertTo(templateImg_hist[2], CV_32F);
+
             Mat originImg = this->frame(boundRect[i]);
-
+            vector<Mat> originImg_bgr;
+            split(originImg, originImg_bgr);
+            Mat originImg_hist[3];
             
-            matchTemplate(originImg, templateImg, result, TM_CCORR_NORMED);
-            normalize(result, result, 0, 1, NORM_MINMAX, -1, Mat());
+            calcHist(&originImg_bgr[0], 1, 0, Mat(), originImg_hist[0], 1, &histSize, histRange, true, false);
+            normalize(originImg_hist[0], originImg_hist[0], 0, 1, NORM_MINMAX, -1, Mat());
+            originImg_hist[0].convertTo(originImg_hist[0], CV_32F);
 
-            double minVal; double maxVal; Point minLoc; Point maxLoc;
-            Point matchLoc;
+            calcHist(&originImg_bgr[1], 1, 0, Mat(), originImg_hist[1], 1, &histSize, histRange, true, false);
+            normalize(originImg_hist[1], originImg_hist[1], 0, 1, NORM_MINMAX, -1, Mat());
+            originImg_hist[1].convertTo(originImg_hist[1], CV_32F);
 
-            minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
-
-            cout << db[j].getFilePath() << " : " << endl;
-            cout << "\tminVal: " << minVal << endl;
-            cout << "\tmaxVal: " << maxVal << endl;
-            cout << "\tminLoc: " << minLoc << endl;
-            cout << "\tmaxLoc: " << maxLoc << endl;
+            calcHist(&originImg_bgr[2], 1, 0, Mat(), originImg_hist[2], 1, &histSize, histRange, true, false);
+            normalize(originImg_hist[2], originImg_hist[2], 0, 1, NORM_MINMAX, -1, Mat());
+            originImg_hist[2].convertTo(originImg_hist[2], CV_32F);
             
+            //Here:
+            double b_corr = compareHist(templateImg_hist[0], originImg_hist[0], HISTCMP_CORREL);
+            double g_corr = compareHist(templateImg_hist[1], originImg_hist[1], HISTCMP_CORREL);
+            double r_corr = compareHist(templateImg_hist[2], originImg_hist[2], HISTCMP_CORREL);
 
+            double corr_f = (b_corr + g_corr + r_corr) / 3;
 
+            if (corr_p < corr_f) {
+                corr_p = corr_f;
+                b_corr_f = b_corr;
+                g_corr_f = g_corr;
+                r_corr_f = r_corr;
+                result = &db[j];
+            }
+
+            retf = true;
         }
-        cout << "--------------" << endl;
+        
+        stringstream ss1,ss2;
+        vector<string> lines;
+        //Found image
+        if (result != NULL && b_corr_f > 0 && g_corr_f > 0 && r_corr_f > 0) {
+            
+            
+            ss1 << "Object " << i << " -> Match: " << corr_p * 100 << " % [" << b_corr_f*100 << " %; " << g_corr_f * 100 << " %; " << r_corr_f * 100 << " %]";
+            lines.push_back(ss1.str()); 
+            ss2 << "Category : " << result->getCategory() << " -> " << result->getFilePath();
+            lines.push_back(ss2.str());
+
+            
+        }
+        else {
+            ss1 << "Object " << i << " -> No Match!!";
+            lines.push_back(ss1.str());
+        }
+
+        text_legend(lines, boundRect[i], 0.05);
+
     }
 
-    return true;
+}
+
+
+void Frame::filter_orange(Mat& m){
+    Mat hsv,out;
+    //Scalar low_orange(46, 85, 45);
+    //Scalar high_orange(55, 100, 60);
+    Scalar low_orange(0, 50, 0);
+    Scalar high_orange(255, 100, 255);
+
+    cvtColor(m, hsv, COLOR_BGR2HSV);
+    
+    inRange(hsv, low_orange, high_orange, out);
+    
+    try{
+        cvtColor(out, m, COLOR_GRAY2BGR);
+    }
+    catch (Exception e) {
+        cout << e.err;
+        exit(1);
+    }
 }
