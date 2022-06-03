@@ -319,12 +319,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Db.cpp" />
     <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="ImageDb.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="ImageDb.h" />
     <ClInclude Include="libs.h" />
     <ClInclude Include="Video.h" />
   </ItemGroup>
